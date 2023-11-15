@@ -24,6 +24,7 @@
  *  \brief  Write-back - cycle accurate model
  */
 
+#include "debug.hcodal"
 // -------------------------------------------------------------------------------------------------
 // Write-Back Stage
 // -------------------------------------------------------------------------------------------------
@@ -33,19 +34,14 @@ event wb : pipeline(pipe.WB)
     semantics
     {
 
+        if(r_wb_regwrite && (r_wb_rd != 0)){
+
+            rf_xpr.wrt0[r_wb_rd] = r_wb_alu;
+            codasip_info(INFO_RF_WRITE, "rf_xpr[%d] = 0x%x", r_wb_rd, r_wb_alu);
+        }
 
         // Set local stall.
         s_wb_stall = 0;
-
-        if(r_wb_regwrite){
-            if(r_wb_rd == 0){
-                codasip_fatal(12, " Trying to write to x0 ");
-            }
-            else{
-            rf_xpr.wrt0[r_wb_rd] = r_wb_alu;
-            codasip_info(3, "rf_xpr[%d] = 0x%x", r_wb_rd, r_wb_alu);
-            }
-        }
 
     };
 };

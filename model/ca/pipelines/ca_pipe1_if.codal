@@ -50,6 +50,11 @@ event fe : pipeline(pipe.IF)
         // Set the local stall signal.
         s_if_stall = 0;
 
+        
+        if_code.transport(CP_PHS_ADDRESS, CP_AHB_NONSEQ, CP_AHB_READ, r_pc, CP_AHB_SIZE_32);
+
+        // Add to PC
+        s_if_nextpc = r_pc + INSTR_SIZE;
         // Update the registers
         if_output();
     };
@@ -59,10 +64,7 @@ event if_output : pipeline(pipe.IF)
 {
     semantics
     {
-        if_code.transport(CP_PHS_ADDRESS, CP_AHB_NONSEQ, CP_AHB_READ, r_pc, CP_AHB_SIZE_32);
-
-        // Add to PC
-        s_if_nextpc = r_pc + INSTR_SIZE;
+       
 
         // Register Assignment
         r_id_pc = r_pc;

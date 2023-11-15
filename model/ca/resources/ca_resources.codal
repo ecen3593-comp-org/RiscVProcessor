@@ -56,7 +56,7 @@ signal bit[INSTR_W] s_id_instr;
 signal bit[ALUOP_W] s_id_aluop;
 
 // Immediate
-signal bit[ADDR_W] s_id_immed;
+signal bit[WORD_W] s_id_immed;
 
 // Destination Reg Signal
 signal bit[RF_XPR_W] s_id_rd;
@@ -100,16 +100,16 @@ register bit[REGWRITE_W] r_ex_regwrite          { pipeline = pipe.EX; };
 register bit[WORD_W] r_ex_reg1                  { pipeline = pipe.EX; };
 
 // ALUSRC Control Bit
-register bit[BOOLEAN_BIT] r_ex_alusrc2          { pipeline = pipe.EX; };
+register bit[SRC2_W] r_ex_alusrc2          { pipeline = pipe.EX; };
 
 // Source Reg2
 register bit[WORD_W] r_ex_reg2                  { pipeline = pipe.EX; };
 
 // Immediate Source
-register bit[ADDR_W] r_ex_immed                { pipeline = pipe.EX; };
+register bit[WORD_W] r_ex_immed                { pipeline = pipe.EX; };
 
 // Source Signal
-signal bit[SRC2_W] s_ex_src2;
+signal bit[WORD_W] s_ex_src2;
 
 // ALU Output Signal
 signal bit[WORD_W] s_ex_alu;
