@@ -78,6 +78,14 @@ signal bit[RF_XPR_W] s_id_rs2;
 signal bit[WORD_W] s_id_reg1;
 signal bit[WORD_W] s_id_reg2;
 
+// Forwarding Signals (Phase 6)
+signal bit[RFF1_W] s_rff1_sel;
+signal bit[RFF2_W] s_rff2_sel;
+
+// Forwarding Registers (Phase 6)
+signal bit[WORD_W] s_id_src1;
+signal bit[WORD_W] s_id_src2;       
+
 // -------------------------------------------------------------------------------------------------
 // Execute stage
 // -------------------------------------------------------------------------------------------------
@@ -114,7 +122,22 @@ signal bit[WORD_W] s_ex_src2;
 // ALU Output Signal
 signal bit[WORD_W] s_ex_alu;
 
+// Phase 6 below
 
+// FWD select lines
+signal bit[FWDA_W] s_ex_fwdA_sl;
+signal bit[FWDB_W] s_ex_fwdB_sl;
+
+// Multiplexor output
+signal bit[WORD_W] s_ex_fwdAsel;
+signal bit[WORD_W] s_ex_fwdBsel;
+
+// Pipeline Registers for FWDCTRL
+register bit[RF_XPR_W] r_ex_rs1                { pipeline = pipe.EX; };
+register bit[RF_XPR_W] r_ex_rs2                { pipeline = pipe.EX; };
+// Pipleine Registers for RegFile Select
+register bit[WORD_W] r_ex_src1                { pipeline = pipe.EX; };
+register bit[WORD_W] r_ex_src2                { pipeline = pipe.EX; };
 // -------------------------------------------------------------------------------------------------
 // Memory stage
 // -------------------------------------------------------------------------------------------------

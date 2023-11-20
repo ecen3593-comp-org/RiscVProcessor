@@ -63,6 +63,46 @@ event id : pipeline(pipe.ID)
 
         // Set local stall.
         s_id_stall = 0;
+
+        // rff1 control
+        if((r_wb_rd == s_id_src1) && (r_wb_rd != 0) && (r_wb_regwrite)){
+            s_rff1_sel = DATA_RESULT1;
+        }
+        else{
+            s_rff1_sel = REG_SRC1;
+        }
+        // rff2 control
+        if((r_wb_rd == s_id_src2) && (r_wb_rd != 0) && (r_wb_regwrite)){
+            s_rff2_sel = DATA_RESULT2;
+        }
+        else{
+            s_rff2_sel = REG_SRC2;
+        }
+        // Set RFF src values
+        switch (s_rff1_sel) {
+            case DATA_RESULT1:
+                s_id_src1 = r_wb_alu;
+                break;
+            case REG_SRC1:
+                s_id_src1 = s_id_reg1;
+                break;
+            default:
+                s_id_src1 = 0;
+                break;
+        }
+        // Set RFF src values
+        switch (s_rff2_sel) {
+            case DATA_RESULT2:
+                s_id_src2 = r_wb_alu;
+                break;
+            case REG_SRC2:
+                s_id_src2 = s_id_reg2;
+                break;
+            default:
+                s_id_src2 = 0;
+                break;
+        }
+
         // Decoder activation
         dec(s_id_opc);
 
@@ -84,12 +124,17 @@ event id_output : pipeline(pipe.ID)
 
         r_ex_immed = s_id_immed;
         r_ex_rd = s_id_rd;
-        r_ex_reg1 = s_id_reg1;
-        r_ex_reg2 = s_id_reg2;
+        
         r_ex_instr = s_id_instr;
         r_ex_aluop = s_id_aluop;
         r_ex_alusrc2 = s_id_alusrc2;
         r_ex_regwrite = s_id_regwrite;
         r_ex_halt = s_id_halt;
+        
+        r_ex_rs1 = s_id_rs1;
+        r_ex_rs2 = s_id_rs2;
+
+        r_ex_src1 = s_id_src1;
+        r_ex_src2 = s_id_src2;
     };
 };
