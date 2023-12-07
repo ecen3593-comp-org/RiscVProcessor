@@ -34,14 +34,20 @@
 // Signal size
 // -------------------------------------------------------------------------------------------------
 
-#define ALUOP_W        bitsizeof(enum aluop)
-#define REGWRITE_W     bitsizeof(enum regwrite)
-#define SRC2_W         bitsizeof(enum src2)
-#define HALT_W         bitsizeof(enum halt)
-#define RFF1_W         bitsizeof(enum rff1_sel)
-#define RFF2_W         bitsizeof(enum rff2_sel)
-#define FWDA_W         bitsizeof(enum fwdA_sel)
-#define FWDB_W         bitsizeof(enum fwdB_sel)
+#define ALUOP_W          bitsizeof(enum aluop)
+#define ALUSRC1_W        bitsizeof(enum alusrc1)
+#define ALUSRC2_W        bitsizeof(enum alusrc2)
+#define HALT_W           bitsizeof(enum halt)
+#define REGWT_W          bitsizeof(enum regwrite)
+#define DHF1_W           bitsizeof(enum dhfwd1)
+#define DHF2_W           bitsizeof(enum dhfwd2)
+#define RFF1_W           bitsizeof(enum rffwd1)
+#define RFF2_W           bitsizeof(enum rffwd2)
+#define IMMED_W          bitsizeof(enum immed)
+#define BRNCH_W          bitsizeof(enum brnchop)
+#define BRADD_W          bitsizeof(enum bradd)
+#define RFWT_W           bitsizeof(enum rfwt)
+
 // -------------------------------------------------------------------------------------------------
 // Enumerations
 // -------------------------------------------------------------------------------------------------
@@ -53,39 +59,32 @@
 // -------------------------------------------------------------------------------------------------
 // ID stage
 // -------------------------------------------------------------------------------------------------
-enum rff1_sel
-{
 
-    REG_SRC1,
-    DATA_RESULT1,
-    // switch(s_rff1_sel)
-    // {
-    //     case 0:
-    //         r_ex_reg1 = r_wb_alu;
-    //         break;
-    //     case 1:
-    //         r_ex_reg1 = s_id_reg1;
-    //         break;     
-    // }
+// Source 1 RF forwarding mux
+enum rffwd1
+{
+    RFF1_REG,
+    RFF1_WB,
 };
 
-enum rff2_sel
+// Source 2 RF forwarding mux
+enum rffwd2
 {
-
-    REG_SRC2,
-    DATA_RESULT2,
-    // switch(s_rff2_sel)
-    // {
-    //     case 0:
-    //         r_ex_reg2 = r_wb_alu;
-    //         break;
-    //     case 1:
-    //         r_ex_reg2 = s_id_reg2;
-    //         break;
-          
-    // }
-
+    RFF2_REG,
+    RFF2_WB,
 };
+
+// Immediate mux
+enum immed
+{
+    IMM_NONE,
+    IMM_ITYPE,
+    IMM_BTYPE,
+    IMM_UTYPE,
+    IMM_STYPE,
+    IMM_JTYPE,
+};
+
 // -------------------------------------------------------------------------------------------------
 // EX stage
 // -------------------------------------------------------------------------------------------------
@@ -95,80 +94,101 @@ enum aluop
 {
     ALU_NOP,
     ALU_ADD,
+    ALU_SUB,
+    ALU_AND,
+    ALU_OR,
+    ALU_XOR,
+    ALU_SLT,
+    ALU_SLTU,
+    ALU_SRL,
+    ALU_SRA,
+    ALU_SLL,
 };
 
-enum regwrite
+// ALU source 1 mux
+enum alusrc1
 {
-    WE_FALSE,
-    WE_TRUE,
+    ALU1_REG,
+    ALU1_ZERO,
+    ALU1_PC,
 };
 
-enum src2
+// ALU source 2 mux
+enum alusrc2
 {
     ALU2_REG,
     ALU2_IMM,
 };
 
+// Source 1 DH forwarding mux
+enum dhfwd1
+{
+    DHF1_REG,
+    DHF1_ME,
+    DHF1_WB,
+};
+
+// Source 2 DH forwarding mux
+enum dhfwd2
+{
+    DHF2_REG,
+    DHF2_ME,
+    DHF2_WB,
+};
+
+// Branch Multiplexor
+enum bradd
+{
+    BRADD_ADDR,
+    BRADD_ALU,
+};
+
+// HALT Command
 enum halt
 {
     HALT_NOHALT,
     HALT_HALT,
 };
 
-enum fwdA_sel
-{
 
-    SOURCE_A,
-    ALU_ME_A,
-    DATA_WB_A,
-    // switch(s_ex_fwdA_sl)
-    // {
-    //     case 0:
-    //         s_ex_fwdAsel = r_ex_reg1;
-    //         break;
-    //     case 1:
-    //         s_ex_fwdAsel = s_me_alu;
-    //         break;
-    //     case 2:
-    //         s_ex_fwdAsel = s_wb_alu;
-    //         break;
-          
-    // }
-};
-
-enum fwdB_sel
-{
-
-    SOURCE_B,
-    ALU_ME_B,
-    DATA_WB_B,
-    // switch(s_ex_fwdB_sl)
-    // {
-    //     case 0:
-    //         s_ex_fwdBsel = r_ex_reg2;
-    //         break;
-    //     case 1:
-    //         s_ex_fwdBsel = s_me_alu;
-    //         break;
-    //     case 2:
-    //         s_ex_fwdBsel = s_wb_alu;
-    //         break;
-          
-    // }
-};
 // -------------------------------------------------------------------------------------------------
 // ME stage
-// -------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+
+// Branch Command
+enum brnchop
+{
+    BRANCH_FALSE,
+    BRANCH_TRUE,
+    BRANCH_COND_FALSE,
+    BRANCH_COND_TRUE,
+};
 
 // -------------------------------------------------------------------------------------------------
 // WB stage
 // -------------------------------------------------------------------------------------------------
 
+// Register File Write
+enum regwrite
+{
+    WE_FALSE,
+    WE_TRUE,
+};
+
+// Register File Data Select
+
+enum rfwt
+{
+    WBMX_ALU,
+    WBMX_PC,
+    WBMX_MEM,
+};
+
 // -------------------------------------------------------------------------------------------------
 // Auxiliary definitions
 // -------------------------------------------------------------------------------------------------
-
 #define DONT_CARE           0
 #define NOP_INSTRUCTION     ITYPE_ADDI
-#endif // CA_DEFINES_HCODAL
+#define CP_AHB_SIZE_0   DONT_CARE
 
+#endif // CA_DEFINES_HCODAL

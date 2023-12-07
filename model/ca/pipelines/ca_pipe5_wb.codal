@@ -24,24 +24,48 @@
  *  \brief  Write-back - cycle accurate model
  */
 
-#include "debug.hcodal"
 // -------------------------------------------------------------------------------------------------
 // Write-Back Stage
 // -------------------------------------------------------------------------------------------------
+#include "debug.hcodal"
+#include "ca_defines.hcodal"
 
 event wb : pipeline(pipe.WB)
 {
     semantics
     {
+         // Create the return address
+        s_wb_pc4 = r_wb_pc + 4;
 
-        if(r_wb_regwrite && (r_wb_rd != 0)){
+       // -----------------------------------------------------------------------------------------
+        // Register File write Multiplexor
+        // -----------------------------------------------------------------------------------------
 
-            rf_xpr.wrt0[r_wb_rd] = r_wb_alu;
-            codasip_info(INFO_RF_WRITE, "rf_xpr[%d] = 0x%x", r_wb_rd, r_wb_alu);
+        switch (r_wb_rfwtsel)
+        {
+            case WBMX_ALU:
+                s_wb_result = r_wb_alu;
+                break;
+
+            case WBMX_PC:
+                s_wb_result = s_wb_pc4;
+                break;
+            default:
+                s_wb_result = 0;
+                codasip_fatal(WBSEL_ERROR, "Default case: %d\n", r_wb_rfwtsel);
+                break;
         }
 
         // Set local stall.
         s_wb_stall = 0;
 
+        // -----------------------------------------------------------------------------------------
+        // Result write
+        // -----------------------------------------------------------------------------------------
+
+        if (r_wb_regwrite && (r_wb_rd != 0))
+        {
+            rf_xpr.wrt0[r_wb_rd] = s_wb_result;
+        }
     };
 };

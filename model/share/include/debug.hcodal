@@ -47,6 +47,9 @@ enum info_levels
     TRACE_LEVEL     = 23,
     WARNING_LEVEL   = 24,
     DEBUG_LEVEL     = 25,
+    BRNCH_ERROR       = 26,
+    IMM_ERROR       = 27,
+    WBSEL_ERROR       = 28,
     FATAL_ERROR_LEVEL = 128
 };
 

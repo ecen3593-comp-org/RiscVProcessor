@@ -37,19 +37,48 @@ event me : pipeline(pipe.ME)
     semantics
     {
 
+        switch (r_me_brnchop)
+        {
+            case BRANCH_FALSE:
+                s_me_pcsrc = 0;
+                break;
+
+            case BRANCH_TRUE:
+                s_me_pcsrc = 1;
+                break;
+
+            case BRANCH_COND_FALSE:
+                s_me_pcsrc = ~r_me_zero;
+                break;
+
+            case BRANCH_COND_TRUE:
+                s_me_pcsrc = r_me_zero;
+                break;
+
+            default:
+                s_me_pcsrc = 0;
+                // codasip_fatal(BRNCH_ERROR, "Default case: %d\n", r_me_brnchop);
+                break;
+        }
+    
+
+        // Update the Registers
         me_output();
     };
 };
+
 
 event me_output : pipeline(pipe.ME)
 {
     semantics
     {
-        // Register Assignment
         r_wb_pc = r_me_pc;
-        r_wb_rd = r_me_rd;
-        r_wb_regwrite = r_me_regwrite;
         r_wb_instr = r_me_instr;
+        
+        r_wb_regwrite = r_me_regwrite;
+        r_wb_rd = r_me_rd;
         r_wb_alu = r_me_alu;
+        r_wb_rfwtsel = r_me_rfwtsel;
+
     };
 };

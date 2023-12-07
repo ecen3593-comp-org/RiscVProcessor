@@ -40,120 +40,147 @@ pipeline pipe
 // -------------------------------------------------------------------------------------------------
 // Fetch stage
 // -------------------------------------------------------------------------------------------------
-
-signal bit[ADDR_W] s_if_nextpc;
+ signal bit[ADDR_W] s_if_nextpc;
+signal bit[ADDR_W] s_if_pcin;
 
 // -------------------------------------------------------------------------------------------------
 // Decode stage
 // -------------------------------------------------------------------------------------------------
 
 // Program Counter
-register bit[ADDR_W] r_id_pc            { pipeline = pipe.ID; };
-// Instruction -- Machine Code
+register bit[ADDR_W] r_id_pc                    { pipeline = pipe.ID; };
+// Instruction
 signal bit[INSTR_W] s_id_instr;
 
+// Instruction Opcode
+signal bit[OPC_W] s_id_opc;
+
+// Decoder Outputs
 // ALU Operation Control
 signal bit[ALUOP_W] s_id_aluop;
 
-// Immediate
-signal bit[WORD_W] s_id_immed;
+// ALU Source Control
+signal bit[ALUSRC1_W] s_id_alusrc1;
+signal bit[ALUSRC2_W] s_id_alusrc2;
 
-// Destination Reg Signal
-signal bit[RF_XPR_W] s_id_rd;
+// Register File Write Control
+signal bit[REGWT_W] s_id_regwrite;
+signal bit[RFWT_W] s_id_rfwtsel;
 
-//Control Signals
-signal bit[REGWRITE_W] s_id_regwrite;
-signal bit[SRC2_W] s_id_alusrc2;
+// Branch control
+signal bit[BRNCH_W] s_id_brnchop;
+signal bit[BRADD_W] s_id_brnchsel;
+
+
+// HALT Control
 signal bit[HALT_W] s_id_halt;
 
+// Immediate selection
+signal bit[IMMED_W] s_id_immsel;
 
-//Instruction opcode + func3 + func7
-signal bit[OPC_W] s_id_opc;
-
-// Register Signals for ALU
+// Instruction Fields
 signal bit[RF_XPR_W] s_id_rs1;
 signal bit[RF_XPR_W] s_id_rs2;
+signal bit[RF_XPR_W] s_id_rd;
 
-// Output RegFile Read Signals
+// Immediate fields
+signal bit[WORD_W] s_id_immed;
+signal bit[WORD_W] s_id_immedi;
+signal bit[WORD_W] s_id_immedb;
+signal bit[WORD_W] s_id_immedu;
+signal bit[WORD_W] s_id_immeds;
+signal bit[WORD_W] s_id_immedj;
+
+// Register File Data
 signal bit[WORD_W] s_id_reg1;
 signal bit[WORD_W] s_id_reg2;
+signal bit[WORD_W] s_id_rf1;
+signal bit[WORD_W] s_id_rf2;
 
-// Forwarding Signals (Phase 6)
-signal bit[RFF1_W] s_rff1_sel;
-signal bit[RFF2_W] s_rff2_sel;
-
-// Forwarding Registers (Phase 6)
-signal bit[WORD_W] s_id_src1;
-signal bit[WORD_W] s_id_src2;       
+// Forwarding Control
+signal bit[RFF1_W] s_id_fwdA;
+signal bit[RFF2_W] s_id_fwdB;
 
 // -------------------------------------------------------------------------------------------------
 // Execute stage
 // -------------------------------------------------------------------------------------------------
 
 // Pipelined Program Counter + Instruction
-register bit[ADDR_W] r_ex_pc            		{ pipeline = pipe.EX; };
+register bit[ADDR_W] r_ex_pc                    { pipeline = pipe.EX; };
 register bit[INSTR_W] r_ex_instr                { pipeline = pipe.EX; };
-register bit[HALT_W] r_ex_halt            		{ pipeline = pipe.EX; };
 
+// Decoder Outputs
 // ALU Operation Control
-register bit[ALUOP_W] r_ex_aluop        		{ pipeline = pipe.EX; };
+register bit[ALUOP_W] r_ex_aluop                { pipeline = pipe.EX; };
 
-// Destination Register
+// ALU Source Control
+register bit[ALUSRC1_W] r_ex_alusrc1            { pipeline = pipe.EX; };
+register bit[ALUSRC2_W] r_ex_alusrc2            { pipeline = pipe.EX; };
+
+// Register File Write Control
+register bit[REGWT_W] r_ex_regwrite             { pipeline = pipe.EX; };
+register bit[RFWT_W] r_ex_rfwtsel               { pipeline = pipe.EX; };
+
+// Branch control
+register bit [BRNCH_W] r_ex_brnchop             { pipeline = pipe.EX; };
+register bit [BRADD_W] r_ex_brnchsel            { pipeline = pipe.EX; };
+
+// HALT Control
+register bit[HALT_W] r_ex_halt                  { pipeline = pipe.EX; };
+
+// Register File Write Address
 register bit[RF_XPR_W] r_ex_rd                  { pipeline = pipe.EX; };
+register bit[RF_XPR_W] r_ex_rs1                 { pipeline = pipe.EX; };
+register bit[RF_XPR_W] r_ex_rs2                 { pipeline = pipe.EX; };
 
-// RegWrite Reg
-register bit[REGWRITE_W] r_ex_regwrite          { pipeline = pipe.EX; };
+// Immediate Data
+register bit[WORD_W] r_ex_immed                 { pipeline = pipe.EX; };
 
-// Source Reg 1
+// Register File Data
 register bit[WORD_W] r_ex_reg1                  { pipeline = pipe.EX; };
-
-// ALUSRC Control Bit
-register bit[SRC2_W] r_ex_alusrc2          { pipeline = pipe.EX; };
-
-// Source Reg2
 register bit[WORD_W] r_ex_reg2                  { pipeline = pipe.EX; };
 
-// Immediate Source
-register bit[WORD_W] r_ex_immed                { pipeline = pipe.EX; };
-
-// Source Signal
+// ALU Data
+signal bit[WORD_W] s_ex_src1;
 signal bit[WORD_W] s_ex_src2;
-
-// ALU Output Signal
 signal bit[WORD_W] s_ex_alu;
+signal bit[1] s_ex_zero;
+signal bit[WORD_W] s_ex_fwd1;
+signal bit[WORD_W] s_ex_fwd2;
 
-// Phase 6 below
+// Forwarding Control
+signal bit[DHF1_W] s_ex_fwdA;
+signal bit[DHF2_W] s_ex_fwdB;
 
-// FWD select lines
-signal bit[FWDA_W] s_ex_fwdA_sl;
-signal bit[FWDB_W] s_ex_fwdB_sl;
+// Branch Address
+signal bit[ADDR_W] s_ex_bradd;
+signal bit[ADDR_W] s_ex_brimm;
 
-// Multiplexor output
-signal bit[WORD_W] s_ex_fwdAsel;
-signal bit[WORD_W] s_ex_fwdBsel;
-
-// Pipeline Registers for FWDCTRL
-register bit[RF_XPR_W] r_ex_rs1                { pipeline = pipe.EX; };
-register bit[RF_XPR_W] r_ex_rs2                { pipeline = pipe.EX; };
-// Pipleine Registers for RegFile Select
-register bit[WORD_W] r_ex_src1                { pipeline = pipe.EX; };
-register bit[WORD_W] r_ex_src2                { pipeline = pipe.EX; };
 // -------------------------------------------------------------------------------------------------
 // Memory stage
 // -------------------------------------------------------------------------------------------------
 
 // Pipelined Program Counter + Instruction
-register bit[ADDR_W] r_me_pc           			{ pipeline = pipe.ME; };
+register bit[ADDR_W] r_me_pc                    { pipeline = pipe.ME; };
 register bit[INSTR_W] r_me_instr                { pipeline = pipe.ME; };
 
-// RegWrite Register
-register bit[REGWRITE_W] r_me_regwrite          { pipeline = pipe.ME; };
+// Register File Write Control
+register bit[REGWT_W] r_me_regwrite             { pipeline = pipe.ME; };
+register bit[RFWT_W] r_me_rfwtsel               { pipeline = pipe.ME; };
 
-// Destination Register
-register bit[RF_XPR_W] r_me_rd                      { pipeline = pipe.ME; };
+// Register File Write Address
+register bit[RF_XPR_W] r_me_rd                  { pipeline = pipe.ME; };
 
-// ALU Register
-register bit[WORD_W] r_me_alu                 { pipeline = pipe.ME; };
+// ALU Data
+register bit[WORD_W] r_me_alu                   { pipeline = pipe.ME; };
+register bit[1] r_me_zero                       { pipeline = pipe.ME; };
+
+// Branch control
+register bit [BRNCH_W] r_me_brnchop             { pipeline = pipe.ME; };
+signal bit[BOOLEAN_BIT] s_me_pcsrc;
+
+// Branch address
+register bit [ADDR_W] r_me_bradd                { pipeline = pipe.ME; };
 
 
 // -------------------------------------------------------------------------------------------------
@@ -161,17 +188,24 @@ register bit[WORD_W] r_me_alu                 { pipeline = pipe.ME; };
 // -------------------------------------------------------------------------------------------------
 
 // Pipelined Program Counter + Instruction
-register bit[ADDR_W] r_wb_pc            		{ pipeline = pipe.WB; };
+register bit[ADDR_W] r_wb_pc                    { pipeline = pipe.WB; };
 register bit[INSTR_W] r_wb_instr                { pipeline = pipe.WB; };
 
-// Destination Register
-register bit[RF_XPR_W] r_wb_rd                      { pipeline = pipe.WB; };
+// Register File Write Control
+register bit[REGWT_W] r_wb_regwrite             { pipeline = pipe.WB; };
+register bit[RFWT_W] r_wb_rfwtsel               { pipeline = pipe.WB; };
 
-// ALU Output Reg
-register bit[WORD_W] r_wb_alu                 { pipeline = pipe.WB; };
+// Register File Write Address
+register bit[RF_XPR_W] r_wb_rd                  { pipeline = pipe.WB; };
 
-// RegWrite Register
-register bit[REGWRITE_W] r_wb_regwrite          { pipeline = pipe.WB; };
+// ALU Data
+register bit[WORD_W] r_wb_alu                   { pipeline = pipe.WB; };
+
+// PC value
+signal bit[ADDR_W] s_wb_pc4;
+
+// Register File Write Value
+signal bit[WORD_W] s_wb_result;
 
 // -------------------------------------------------------------------------------------------------
 // Pipeline control
@@ -189,12 +223,9 @@ signal   bit[1] s_wb_stall;
 signal   bit[1] s_wb_clear;
 
 
-
-
 // -------------------------------------------------------------------------------------------------
 // SYSCALL support for simulation
 // -------------------------------------------------------------------------------------------------
 signal bit [BOOLEAN_BIT]            s_syscall_pending;
 signal bit [BOOLEAN_BIT]            s_syscall_stall;
 register bit [TWO_BIT]              r_syscall_delay         {default = 0;};
-

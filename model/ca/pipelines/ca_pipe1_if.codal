@@ -37,24 +37,38 @@ event fe : pipeline(pipe.IF)
 
     semantics
     {
+
+        // -----------------------------------------------------------------------------------------
+        // Instruction fetch request
+        // -----------------------------------------------------------------------------------------
+        uint2 status;
+        uint4 cache_hprot;
+         cache_hprot = 0;
+     
+        // s_if_nextpc = r_pc + INSTR_SIZE;
+
+        if (s_me_pcsrc == true){
+             s_if_pcin = r_me_bradd;
+        }
+        else {
+            s_if_pcin = r_pc;
+        }
+
+        // Instruction request
+        // cache_hprot = pma_hprot(s_if_nextpc[31 .. 2] :: (uint2)0, 0u);
+        // if(!s_id_stall)
+        if_code.transport(CP_PHS_ADDRESS, CP_AHB_NONSEQ, CP_AHB_READ, s_if_pcin[31 .. 2] :: (uint2) 0, CP_AHB_SIZE_32, cache_hprot, CP_AHB_UNLOCK);
+
         // -----------------------------------------------------------------------------------------
         // Pipeline control
         // -----------------------------------------------------------------------------------------
-
+        s_if_nextpc = s_if_pcin + INSTR_SIZE;
         // Set all the clear signals.
-        s_id_clear = 0;
-        s_ex_clear = 0;
+        s_id_clear = 0; 
+        s_ex_clear = s_me_pcsrc;
         s_wb_clear = 0;
-        s_me_clear = 0;
-
-        // Set the local stall signal.
-        s_if_stall = 0;
-
+        s_me_clear = s_me_pcsrc;
         
-        if_code.transport(CP_PHS_ADDRESS, CP_AHB_NONSEQ, CP_AHB_READ, r_pc, CP_AHB_SIZE_32);
-
-        // Add to PC
-        s_if_nextpc = r_pc + INSTR_SIZE;
         // Update the registers
         if_output();
     };
@@ -64,13 +78,10 @@ event if_output : pipeline(pipe.IF)
 {
     semantics
     {
-       
-
-        // Register Assignment
-        r_id_pc = r_pc;
-
-        r_pc = s_if_nextpc;
-
-        r_id_clear = s_id_clear;
+        
+        r_pc =  s_if_nextpc;
+        r_id_pc = s_if_pcin;
+        r_id_clear = 0;
     };
 };
+
