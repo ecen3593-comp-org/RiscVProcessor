@@ -41,7 +41,9 @@ set dec = i_hw_halt,
           i_hw_shift,
           i_hw_branch,
           i_hw_jalr,
-          i_hw_jal;
+          i_hw_jal,
+          i_hw_loads,
+          i_hw_store;
 
 // -------------------------------------------------------------------------------------------------
 // Halt instruction
@@ -74,6 +76,8 @@ element i_hw_halt
         s_id_brnchop = BRANCH_FALSE;
         s_id_brnchsel = BRADD_ADDR;
 
+        // Memop Control Logic
+        s_id_memop = MEM_NOP;
 
         // HALT Command
         s_id_halt = HALT_HALT;
@@ -154,6 +158,9 @@ element i_hw_alu
         s_id_brnchop = BRANCH_FALSE;
         s_id_brnchsel = BRADD_ADDR;
 
+        // Memop Control Logic
+        s_id_memop = MEM_NOP;
+
         // HALT Command
         s_id_halt = HALT_NOHALT;
     };
@@ -219,6 +226,9 @@ element i_hw_alu_i
         s_id_brnchop = BRANCH_FALSE;
         s_id_brnchsel = BRADD_ADDR;
 
+        // Memop Control Logic
+        s_id_memop = MEM_NOP;
+
         // HALT Command
         s_id_halt = HALT_NOHALT;
     };
@@ -270,6 +280,9 @@ element i_hw_shift
         s_id_brnchop = BRANCH_FALSE;
         s_id_brnchsel = BRADD_ADDR;
 
+        // Memop Control Logic
+        s_id_memop = MEM_NOP;
+
         // HALT Command
         s_id_halt = HALT_NOHALT;
     };
@@ -313,6 +326,9 @@ element i_hw_upper_imm
         // Branch control
         s_id_brnchop = BRANCH_FALSE;
         s_id_brnchsel = BRADD_ADDR;
+
+        // Memop Control Logic
+        s_id_memop = MEM_NOP;
 
 
         // HALT Command
@@ -385,6 +401,9 @@ element i_hw_branch
         // Branch select
         s_id_brnchsel = BRADD_ADDR;
 
+        // Memop Control Logic
+        s_id_memop = MEM_NOP;
+
         // HALT Command
         s_id_halt = HALT_NOHALT;
     };
@@ -419,6 +438,9 @@ element i_hw_jalr
         s_id_brnchop = BRANCH_TRUE;
         s_id_brnchsel = BRADD_ALU;
 
+        // Memop Control Logic
+        s_id_memop = MEM_NOP;
+
         // HALT Command
         s_id_halt = HALT_NOHALT;
     };
@@ -452,10 +474,134 @@ element i_hw_jal
         s_id_brnchop = BRANCH_TRUE;
         s_id_brnchsel = BRADD_ADDR;
 
+        // Memop Control Logic
+        s_id_memop = MEM_NOP;
+
+        // HALT Command
+        s_id_halt = HALT_NOHALT;
+    };
+};
+
+// -------------------------------------------------------------------------------------------------
+// LOAD INSTRUCTIONS
+// -------------------------------------------------------------------------------------------------
+
+element i_hw_loads
+{
+    use opc_itype_loads as opc;
+    // what type of opc above?
+
+    assembly { opc };
+    binary { opc };
+
+    semantics
+    {
+
+        // Operand MUXes
+        switch (opc)
+        {
+            case ITYPE_LB:
+                s_id_memop = MEM_LB;
+                break;
+
+            case ITYPE_LBU:
+                s_id_memop = MEM_LBU;
+                break;
+            
+            case ITYPE_LH:
+                s_id_memop = MEM_LH;
+                break;
+
+            case ITYPE_LHU:
+                s_id_memop = MEM_LHU;
+                break;
+
+            case ITYPE_LW:
+                s_id_memop = MEM_LW;
+                break;
+
+            default:
+                s_id_memop = 0;
+                codasip_fatal(MEM_ERROR, "Fail in decoder loads: %d\n", opc);
+                break;
+
+        }
+
+        // Register file write enable
+        s_id_regwrite = WE_TRUE;
+        s_id_rfwtsel = RFWT_MEM;
+
+        // ALU Operation
+        s_id_aluop = ALU_ADD;
+
+        // Operand MUXes
+        s_id_alusrc1 = ALU1_REG;
+        s_id_alusrc2 = ALU2_IMM;
+        s_id_immsel = IMM_ITYPE;
+
+        // Branch control
+        s_id_brnchop = BRANCH_FALSE;
+        s_id_brnchsel = DONT_CARE;
+
         // HALT Command
         s_id_halt = HALT_NOHALT;
     };
 };
 
 
+// -------------------------------------------------------------------------------------------------
+// LOAD INSTRUCTIONS
+// -------------------------------------------------------------------------------------------------
 
+element i_hw_store
+{
+    use opc_stype_store as opc;
+    // what type of opc above?
+
+    assembly { opc };
+    binary { opc };
+
+    semantics
+    {
+
+        // Operand MUXes
+        switch (opc)
+        {
+            case STYPE_SB:
+                s_id_memop = MEM_SB;
+                break;
+
+            case STYPE_SH:
+                s_id_memop = MEM_SH;
+                break;
+            
+            case STYPE_SW:
+                s_id_memop = MEM_SW;
+                break;
+            default:
+                s_id_memop = 0;
+                codasip_fatal(MEM_ERROR, "Fail in decoder store: %d\n", opc);
+                break;
+
+        }
+
+        // Register file write enable
+        s_id_regwrite = WE_FALSE;
+        s_id_rfwtsel = RFWT_MEM;
+
+        // ALU Operation
+        s_id_aluop = ALU_ADD;
+
+        // Operand MUXes
+        s_id_alusrc1 = ALU1_REG;
+        s_id_alusrc2 = ALU2_IMM;
+        s_id_immsel = IMM_STYPE;
+
+        // Branch control
+        s_id_brnchop = BRANCH_FALSE;
+        s_id_brnchsel = DONT_CARE;
+
+        // HALT Command
+        s_id_halt = HALT_NOHALT;
+    };
+};

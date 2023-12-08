@@ -33,6 +33,7 @@
 event ex : pipeline(pipe.EX)
 {
     use ex_output;
+    use ex_memory;
 
     semantics
     {
@@ -203,6 +204,8 @@ event ex : pipeline(pipe.EX)
                 break;
         }
 
+        ex_memory();
+
         // HALT instruction detection
         if (r_ex_halt == HALT_HALT)
         {
@@ -241,9 +244,88 @@ event ex : pipeline(pipe.EX)
 
         // Update the Registers
         ex_output();
+        
     };
 };
 
+event ex_memory : pipeline(pipe.EX)
+{
+    semantics
+    {
+        uint1 op_rw; // read/write
+        uint2 op_type; // non-sequential/burst/idle
+
+        switch(r_ex_memop)
+        {
+
+        // LOADS
+            case MEM_LB:
+                op_rw = CP_AHB_READ;
+                op_type = CP_AHB_NONSEQ;
+                s_ex_memsize = CP_AHB_SIZE_8;
+                break;
+            case MEM_LBU:
+                op_rw = CP_AHB_READ;
+                op_type = CP_AHB_NONSEQ;
+                s_ex_memsize = CP_AHB_SIZE_8;
+                break;        
+            case MEM_LH:
+                op_rw = CP_AHB_READ;
+                op_type = CP_AHB_NONSEQ;
+                s_ex_memsize = CP_AHB_SIZE_16;
+                break;
+            case MEM_LHU:
+                op_rw = CP_AHB_READ;
+                op_type = CP_AHB_NONSEQ;
+                s_ex_memsize = CP_AHB_SIZE_16;
+                break;
+            case MEM_LW:
+                op_rw = CP_AHB_READ;
+                op_type = CP_AHB_NONSEQ;
+                s_ex_memsize = CP_AHB_SIZE_32;
+                break;
+
+        // STORES
+
+            case MEM_SB:
+                op_rw = CP_AHB_WRITE;
+                op_type = CP_AHB_NONSEQ;
+                s_ex_memsize = CP_AHB_SIZE_8;
+                break;
+            case MEM_SH:
+                op_rw = CP_AHB_WRITE;
+                op_type = CP_AHB_NONSEQ;
+                s_ex_memsize = CP_AHB_SIZE_16;
+                break;
+            case MEM_SW:
+                op_rw = CP_AHB_WRITE;
+                op_type = CP_AHB_NONSEQ;
+                s_ex_memsize = CP_AHB_SIZE_32;
+                break;
+            
+        // OTHER
+
+            case MEM_NOP:
+                op_rw = DONT_CARE;
+                op_type = CP_AHB_IDLE;
+                s_ex_memsize = DONT_CARE;
+                break;
+
+            
+            default:
+                codasip_fatal(MEM_ERROR, "Fail in ex_memory: %d\n", r_ex_memop);
+                break;
+
+        }
+
+        // Call to transport for ldst interface
+        ldst.transport( CP_PHS_ADDRESS , op_type , op_rw , s_ex_alu , s_ex_memsize );
+        s_ex_encoded_data = ldst.encode_data( s_ex_fwd2 , s_ex_alu , s_ex_memsize );
+
+        s_me_stall = s_ex_stall;
+
+    };
+};
 
 event ex_output : pipeline(pipe.EX)
 {
@@ -259,6 +341,11 @@ event ex_output : pipeline(pipe.EX)
         r_me_zero = s_ex_zero;
         r_me_brnchop = r_ex_brnchop;
         r_me_rfwtsel = r_ex_rfwtsel;
+
+        // PHASE 8
+        r_me_memop = r_ex_memop;
+        r_me_memsize = s_ex_memsize;
+        r_me_encoded_data = s_ex_encoded_data;
 
     };
 };

@@ -101,6 +101,14 @@ signal bit[WORD_W] s_id_rf2;
 signal bit[RFF1_W] s_id_fwdA;
 signal bit[RFF2_W] s_id_fwdB;
 
+// PHASE 8
+
+// Memory Control Logic
+signal bit[MEMOP_W] s_id_memop;
+
+// Load Hazard Control
+signal bit[BOOLEAN_BIT] s_id_loadhaz;
+
 // -------------------------------------------------------------------------------------------------
 // Execute stage
 // -------------------------------------------------------------------------------------------------
@@ -156,6 +164,19 @@ signal bit[DHF2_W] s_ex_fwdB;
 signal bit[ADDR_W] s_ex_bradd;
 signal bit[ADDR_W] s_ex_brimm;
 
+// PHASE 8
+
+// Memop Pipeline Reg
+register bit[MEMOP_W] r_ex_memop                 { pipeline = pipe.EX; };
+
+// Memory Size Control
+signal bit[2] s_ex_memsize;
+// should this be uint32? ^
+
+// Return from Encoded Data
+signal bit[WORD_W] s_ex_encoded_data;
+
+
 // -------------------------------------------------------------------------------------------------
 // Memory stage
 // -------------------------------------------------------------------------------------------------
@@ -182,6 +203,23 @@ signal bit[BOOLEAN_BIT] s_me_pcsrc;
 // Branch address
 register bit [ADDR_W] r_me_bradd                { pipeline = pipe.ME; };
 
+// PHASE 8
+
+// Memop Pipeline Register
+register bit[MEMOP_W] r_me_memop                 { pipeline = pipe.ME; };
+
+// Memsize Pipeline Register
+register bit[2] r_me_memsize                { pipeline = pipe.ME; };
+
+// Encoded Data Pipeline Register
+register bit[WORD_W] r_me_encoded_data           { pipeline = pipe.ME; };
+
+// Return from decoded data
+signal bit[WORD_W] s_me_decoded_data;
+
+// Formatted Decode Data
+signal bit[WORD_W] s_me_mem_result;
+
 
 // -------------------------------------------------------------------------------------------------
 // Writeback stage
@@ -207,6 +245,11 @@ signal bit[ADDR_W] s_wb_pc4;
 // Register File Write Value
 signal bit[WORD_W] s_wb_result;
 
+// PHASE 8
+
+// Mem Result Pipeline Register
+register bit[WORD_W] r_wb_mem_result            { pipeline = pipe.WB; };
+
 // -------------------------------------------------------------------------------------------------
 // Pipeline control
 // -------------------------------------------------------------------------------------------------
@@ -221,6 +264,12 @@ signal   bit[1] s_me_stall;
 signal   bit[1] s_me_clear;
 signal   bit[1] s_wb_stall;
 signal   bit[1] s_wb_clear;
+//  PHASE 8
+register bit[1] r_id_stall {default = false;};
+// Preservation of Last Instruction
+register bit[INSTR_W] r_id_instr_preserved;
+// Preservation of Last PC
+register bit[ADDR_W] r_id_pc_preserved;
 
 
 // -------------------------------------------------------------------------------------------------

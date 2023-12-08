@@ -47,7 +47,19 @@ event id : pipeline(pipe.ID)
         // -----------------------------------------------------------------------------------------
 
         if_code.transport(CP_PHS_DATA, cache_ready, cache_response, id_instr_temp); 
-        s_id_instr = (r_id_clear) ? NOP_INSTRUCTION : id_instr_temp;
+
+        // PHASE 8
+        if(r_id_clear){
+            s_id_instr = NOP_INSTRUCTION;
+        }
+        else if(r_id_stall){
+            s_id_instr = r_id_instr_preserved;
+            r_id_pc = r_id_pc_preserved;
+        }
+        else{
+            s_id_instr = id_instr_temp;
+        }
+        //s_id_instr = (r_id_clear) ? NOP_INSTRUCTION : id_instr_temp;
 
         // -----------------------------------------------------------------------------------------
         // Instruction parsing
@@ -129,8 +141,6 @@ event id : pipeline(pipe.ID)
         }
 
 
-        // Set local stall.
-        s_id_stall = s_ex_stall ;
         // Decoder activation
         dec(s_id_opc);
 
@@ -166,6 +176,16 @@ event id : pipeline(pipe.ID)
                 break;
         }
 
+        if(((r_ex_rd == s_id_rs1) || (r_ex_rd == s_id_rs2)) && (r_ex_memop >= MEM_LB) && (r_ex_rd !=0)){
+            s_id_loadhaz = 1;
+        }
+        else{
+            s_id_loadhaz = 0;
+        }
+
+        // Set local stall.
+        s_id_stall = s_ex_stall||s_id_loadhaz;
+
         // Update the registers
         id_output();
     };
@@ -196,6 +216,10 @@ event id_output : pipeline(pipe.ID)
         r_ex_brnchop = s_id_brnchop;
         r_ex_brnchsel = s_id_brnchsel;
         r_ex_rfwtsel = s_id_rfwtsel;
+
+        // PHASE 8
+        r_id_instr_preserved = s_id_instr;
+        r_id_pc_preserved = r_id_pc;
 
     };
 };

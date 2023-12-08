@@ -47,6 +47,7 @@
 #define BRNCH_W          bitsizeof(enum brnchop)
 #define BRADD_W          bitsizeof(enum bradd)
 #define RFWT_W           bitsizeof(enum rfwt)
+#define MEMOP_W          bitsizeof(enum mem_ops)
 
 // -------------------------------------------------------------------------------------------------
 // Enumerations
@@ -83,6 +84,20 @@ enum immed
     IMM_UTYPE,
     IMM_STYPE,
     IMM_JTYPE,
+};
+
+enum mem_ops
+{
+    MEM_NOP,
+    MEM_SB,
+    MEM_SH,
+    MEM_SW,
+    MEM_LB,
+    MEM_LBU,
+    MEM_LH,
+    MEM_LHU,
+    MEM_LW,
+    
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -181,7 +196,7 @@ enum rfwt
 {
     WBMX_ALU,
     WBMX_PC,
-    WBMX_MEM,
+    RFWT_MEM,
 };
 
 // -------------------------------------------------------------------------------------------------

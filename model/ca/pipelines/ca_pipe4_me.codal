@@ -33,6 +33,7 @@
 event me : pipeline(pipe.ME)
 {
     use me_output;
+    use me_memory;
 
     semantics
     {
@@ -63,10 +64,64 @@ event me : pipeline(pipe.ME)
     
 
         // Update the Registers
+        me_memory();
         me_output();
     };
 };
 
+
+event me_memory : pipeline(pipe.ME)
+{
+    semantics
+    {
+        uint1 data_ready; // data ready indicator
+        uint1 data_response;  // response indicator
+        uint32 load_data_temp;  // temp holder for value read from mem
+
+        if(r_me_memop == MEM_NOP){
+            data_ready = 1;
+            data_response = 1;
+            load_data_temp = 0;
+        }
+        else{
+            ldst.transport( CP_PHS_DATA , data_ready , data_response , load_data_temp , r_me_encoded_data );
+            s_me_decoded_data = ldst.decode_data( load_data_temp , r_me_alu , r_me_memsize );
+            
+            switch (r_me_memop)
+            {
+            case MEM_LB:
+                s_me_mem_result = (int32)(int8) s_me_decoded_data;
+                break;
+            case MEM_LBU:
+                s_me_mem_result = (uint32)(uint8) s_me_decoded_data;
+                break;
+
+            case MEM_LH:
+                s_me_mem_result = (int32)(int16) s_me_decoded_data;
+                break;
+            case MEM_LHU:
+                s_me_mem_result = (uint32)(uint16) s_me_decoded_data;
+                break;
+                
+            case MEM_LW:
+                s_me_mem_result = s_me_decoded_data;
+                break;
+            default:
+                s_me_mem_result = 0;
+                codasip_fatal(MEM_ERROR, "Fail in me_memory element: %d\n", r_me_memop);
+                break;
+        }
+
+        if((data_ready==0) && (data_response==0)){
+            s_me_stall = true;
+        }
+        else{
+            s_me_stall = false;
+        }
+    }
+
+    };
+};
 
 event me_output : pipeline(pipe.ME)
 {
@@ -79,6 +134,9 @@ event me_output : pipeline(pipe.ME)
         r_wb_rd = r_me_rd;
         r_wb_alu = r_me_alu;
         r_wb_rfwtsel = r_me_rfwtsel;
+
+        // PHASE 8
+        r_wb_mem_result = s_me_mem_result;
 
     };
 };

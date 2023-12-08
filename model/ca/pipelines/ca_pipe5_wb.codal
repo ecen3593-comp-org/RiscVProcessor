@@ -50,6 +50,11 @@ event wb : pipeline(pipe.WB)
             case WBMX_PC:
                 s_wb_result = s_wb_pc4;
                 break;
+
+            case RFWT_MEM:
+                s_wb_result = r_wb_mem_result;
+                break;
+
             default:
                 s_wb_result = 0;
                 codasip_fatal(WBSEL_ERROR, "Default case: %d\n", r_wb_rfwtsel);

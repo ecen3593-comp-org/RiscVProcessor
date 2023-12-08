@@ -50,6 +50,7 @@ enum info_levels
     BRNCH_ERROR       = 26,
     IMM_ERROR       = 27,
     WBSEL_ERROR       = 28,
+    MEM_ERROR         = 69,
     FATAL_ERROR_LEVEL = 128
 };
 
