@@ -176,11 +176,36 @@ event id : pipeline(pipe.ID)
                 break;
         }
 
-        if(((r_ex_rd == s_id_rs1) || (r_ex_rd == s_id_rs2)) && (r_ex_memop >= MEM_LB) && (r_ex_rd !=0)){
-            s_id_loadhaz = 1;
+        // if(((r_ex_rd == s_id_rs1) || (r_ex_rd == s_id_rs2)) && (r_ex_memop >= MEM_LB) && (r_ex_rd !=0)){
+        //     s_id_loadhaz = 1;
+        // }
+        // else{
+        //     s_id_loadhaz = 0;
+        // }
+
+        if(((r_ex_rd == s_id_rs1) || (r_ex_rd == s_id_rs2) || r_ex_rd !=0){
+            switch(r_ex_memop){
+                case MEM LB:
+                    s_id_loadhaz = 1;
+                    break;
+                case MEM LBU:
+                    s_id_loadhaz = 1;
+                    break; 
+                case MEM LH:
+                    s_id_loadhaz = 1;
+                    break;
+                case MEM LHU:
+                    s_id_loadhaz = 1;
+                    break; 
+                case MEM LW:
+                    s_id_loadhaz = 1;
+                    break; 
+                default:
+                    s_id_loadhaz = 0;
+            }
         }
         else{
-            s_id_loadhaz = 0;
+            s_id_loadhaz;
         }
 
         // Set local stall.
@@ -220,6 +245,7 @@ event id_output : pipeline(pipe.ID)
         // PHASE 8
         r_id_instr_preserved = s_id_instr;
         r_id_pc_preserved = r_id_pc;
+        r_ex_memop = s_id_memop;
 
     };
 };

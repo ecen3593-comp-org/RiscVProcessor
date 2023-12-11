@@ -541,7 +541,7 @@ element i_hw_loads
 
         // Branch control
         s_id_brnchop = BRANCH_FALSE;
-        s_id_brnchsel = DONT_CARE;
+        s_id_brnchsel = BRADD_ADDR;
 
         // HALT Command
         s_id_halt = HALT_NOHALT;
@@ -599,7 +599,7 @@ element i_hw_store
 
         // Branch control
         s_id_brnchop = BRANCH_FALSE;
-        s_id_brnchsel = DONT_CARE;
+        s_id_brnchsel = BRADD_ADDR;
 
         // HALT Command
         s_id_halt = HALT_NOHALT;

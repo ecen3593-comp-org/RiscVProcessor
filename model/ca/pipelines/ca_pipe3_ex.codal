@@ -205,6 +205,7 @@ event ex : pipeline(pipe.EX)
         }
 
         ex_memory();
+        s_ex_stall = s_me_stall;
 
         // HALT instruction detection
         if (r_ex_halt == HALT_HALT)
@@ -240,7 +241,6 @@ event ex : pipeline(pipe.EX)
         // Zero generation
         s_ex_zero = (s_ex_alu == 0);
 
-        s_ex_stall = s_me_stall;
 
         // Update the Registers
         ex_output();
@@ -308,7 +308,7 @@ event ex_memory : pipeline(pipe.EX)
             case MEM_NOP:
                 op_rw = DONT_CARE;
                 op_type = CP_AHB_IDLE;
-                s_ex_memsize = DONT_CARE;
+                s_ex_memsize = CP_AHB_SIZE_0;
                 break;
 
             
@@ -322,7 +322,6 @@ event ex_memory : pipeline(pipe.EX)
         ldst.transport( CP_PHS_ADDRESS , op_type , op_rw , s_ex_alu , s_ex_memsize );
         s_ex_encoded_data = ldst.encode_data( s_ex_fwd2 , s_ex_alu , s_ex_memsize );
 
-        s_me_stall = s_ex_stall;
 
     };
 };

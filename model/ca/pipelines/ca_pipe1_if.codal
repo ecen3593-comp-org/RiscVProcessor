@@ -65,7 +65,8 @@ event fe : pipeline(pipe.IF)
         s_if_nextpc = s_if_pcin + INSTR_SIZE;
         // Set all the clear signals.
         s_id_clear = 0; 
-        s_ex_clear = s_me_pcsrc||s_id_loadhaz;
+       // s_ex_clear = s_me_pcsrc||s_id_loadhaz;
+        s_ex_clear = s_me_pcsrc||s_id_stall;
         s_wb_clear = 0;
         s_me_clear = s_me_pcsrc;
         

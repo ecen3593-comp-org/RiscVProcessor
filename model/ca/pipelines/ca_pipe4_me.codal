@@ -82,12 +82,14 @@ event me_memory : pipeline(pipe.ME)
             data_ready = 1;
             data_response = 1;
             load_data_temp = 0;
+            s_me_decoded_data = 0;
         }
         else{
             ldst.transport( CP_PHS_DATA , data_ready , data_response , load_data_temp , r_me_encoded_data );
             s_me_decoded_data = ldst.decode_data( load_data_temp , r_me_alu , r_me_memsize );
-            
-            switch (r_me_memop)
+        }
+
+        switch (r_me_memop)
             {
             case MEM_LB:
                 s_me_mem_result = (int32)(int8) s_me_decoded_data;
@@ -110,7 +112,7 @@ event me_memory : pipeline(pipe.ME)
                 s_me_mem_result = 0;
                 codasip_fatal(MEM_ERROR, "Fail in me_memory element: %d\n", r_me_memop);
                 break;
-        }
+            }
 
         if((data_ready==0) && (data_response==0)){
             s_me_stall = true;
@@ -120,8 +122,8 @@ event me_memory : pipeline(pipe.ME)
         }
     }
 
-    };
 };
+
 
 event me_output : pipeline(pipe.ME)
 {
