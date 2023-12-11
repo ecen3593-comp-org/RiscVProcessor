@@ -110,7 +110,6 @@ event me_memory : pipeline(pipe.ME)
                 break;
             default:
                 s_me_mem_result = 0;
-                codasip_fatal(MEM_ERROR, "Fail in me_memory element: %d\n", r_me_memop);
                 break;
             }
 
@@ -120,7 +119,7 @@ event me_memory : pipeline(pipe.ME)
         else{
             s_me_stall = false;
         }
-    }
+    };
 
 };
 

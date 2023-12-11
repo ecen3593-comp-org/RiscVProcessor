@@ -183,29 +183,30 @@ event id : pipeline(pipe.ID)
         //     s_id_loadhaz = 0;
         // }
 
-        if(((r_ex_rd == s_id_rs1) || (r_ex_rd == s_id_rs2) || r_ex_rd !=0){
+        if(((r_ex_rd == s_id_rs1) || (r_ex_rd == s_id_rs2) || r_ex_rd !=0)){
             switch(r_ex_memop){
-                case MEM LB:
+                case MEM_LB:
                     s_id_loadhaz = 1;
                     break;
-                case MEM LBU:
+                case MEM_LBU:
                     s_id_loadhaz = 1;
                     break; 
-                case MEM LH:
+                case MEM_LH:
                     s_id_loadhaz = 1;
                     break;
-                case MEM LHU:
+                case MEM_LHU:
                     s_id_loadhaz = 1;
                     break; 
-                case MEM LW:
+                case MEM_LW:
                     s_id_loadhaz = 1;
                     break; 
                 default:
                     s_id_loadhaz = 0;
+                    break;
             }
         }
         else{
-            s_id_loadhaz;
+            s_id_loadhaz=0;
         }
 
         // Set local stall.
