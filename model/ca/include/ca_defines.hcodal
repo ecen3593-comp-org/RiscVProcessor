@@ -177,6 +177,10 @@ enum brnchop
     BRANCH_TRUE,
     BRANCH_COND_FALSE,
     BRANCH_COND_TRUE,
+    BRANCH_JAL,
+    BRANCH_JALR,
+    BRANCH_BEQ,
+    BRANCH_BNE,
 };
 
 // -------------------------------------------------------------------------------------------------

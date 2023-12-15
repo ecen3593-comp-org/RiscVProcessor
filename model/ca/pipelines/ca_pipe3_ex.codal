@@ -146,6 +146,7 @@ event ex : pipeline(pipe.EX)
         // ALU
         // ----------------------------------------------------------------------------------------
 
+
         switch (r_ex_aluop)
         {
             // Nop
@@ -204,6 +205,8 @@ event ex : pipeline(pipe.EX)
                 break;
         }
 
+
+
         ex_memory();
         s_ex_stall = s_me_stall;
 
@@ -239,7 +242,29 @@ event ex : pipeline(pipe.EX)
         }
 
         // Zero generation
-        s_ex_zero = (s_ex_alu == 0);
+        //s_ex_zero = (s_ex_alu == 0);
+        // Phase 9
+        s_ex_zero = s_ex_src1 ^ s_ex_src2;
+
+        switch(r_ex_brnchop){
+            // case BRANCH_JAL:
+            //     s_ex_take_branch = 1;
+            //     break;
+            case BRANCH_JALR:
+                s_ex_take_branch = 1;
+                break;
+            case BRANCH_BNE:
+                s_ex_take_branch = s_ex_zero;
+                break;
+            case BRANCH_BEQ:
+                s_ex_take_branch = ~s_ex_zero;
+                break;
+            default:
+                s_ex_take_branch = 0;
+                //codasip_fatal(BRNCH_ERROR, "Branch Optimization EX error %d\n", r_ex_brnchop);
+                break;
+
+        }
 
 
         // Update the Registers

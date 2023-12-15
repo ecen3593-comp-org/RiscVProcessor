@@ -109,6 +109,9 @@ signal bit[MEMOP_W] s_id_memop;
 // Load Hazard Control
 signal bit[BOOLEAN_BIT] s_id_loadhaz;
 
+// Phase 9
+signal bit[1] s_id_jal_branch;
+
 // -------------------------------------------------------------------------------------------------
 // Execute stage
 // -------------------------------------------------------------------------------------------------
@@ -175,6 +178,9 @@ signal bit[2] s_ex_memsize;
 
 // Return from Encoded Data
 signal bit[WORD_W] s_ex_encoded_data;
+
+// PHASE 9
+signal bit[1] s_ex_take_branch;
 
 
 // -------------------------------------------------------------------------------------------------

@@ -212,6 +212,10 @@ event id : pipeline(pipe.ID)
         // Set local stall.
         s_id_stall = s_ex_stall||s_id_loadhaz;
 
+        // Phase 9
+        if((s_id_brnchop == BRANCH_JAL) && (s_ex_take_branch==0)) s_id_jal_branch = 1;
+        else s_id_jal_branch = 0;
+
         // Update the registers
         id_output();
     };
@@ -238,8 +242,10 @@ event id_output : pipeline(pipe.ID)
         r_ex_reg1 = s_id_reg1;
         r_ex_reg2 = s_id_reg2;
         r_ex_rs1 = s_id_rs1;
-        r_ex_rs2 = s_id_rs2;
+        r_ex_rs2 = s_id_rs2; 
         r_ex_brnchop = s_id_brnchop;
+    
+        
         r_ex_brnchsel = s_id_brnchsel;
         r_ex_rfwtsel = s_id_rfwtsel;
 

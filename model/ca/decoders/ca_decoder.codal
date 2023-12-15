@@ -358,12 +358,16 @@ element i_hw_branch
         {
             case BTYPE_BEQ:
                 s_id_aluop = ALU_SUB;
-                s_id_brnchop = BRANCH_COND_TRUE;
+                //s_id_brnchop = BRANCH_COND_TRUE;
+                // Phase 9
+                s_id_brnchop = BRANCH_BEQ;
                 break;
 
             case BTYPE_BNE:
                 s_id_aluop = ALU_SUB;
-                s_id_brnchop = BRANCH_COND_FALSE;
+                //s_id_brnchop = BRANCH_COND_FALSE;
+                // PHASE 9
+                s_id_brnchop = BRANCH_BNE;
                 break;
 
             case BTYPE_BLT:
@@ -435,7 +439,9 @@ element i_hw_jalr
         s_id_immsel = IMM_ITYPE;
 
         // Branch control
-        s_id_brnchop = BRANCH_TRUE;
+        //s_id_brnchop = BRANCH_TRUE;
+        // Phase 9
+        s_id_brnchop = BRANCH_JALR;
         s_id_brnchsel = BRADD_ALU;
 
         // Memop Control Logic
@@ -471,7 +477,9 @@ element i_hw_jal
         s_id_immsel = IMM_JTYPE;
 
         // Branch control
-        s_id_brnchop = BRANCH_TRUE;
+        //s_id_brnchop = BRANCH_TRUE;
+        // PHASE 9
+        s_id_brnchop = BRANCH_JAL;
         s_id_brnchsel = BRADD_ADDR;
 
         // Memop Control Logic

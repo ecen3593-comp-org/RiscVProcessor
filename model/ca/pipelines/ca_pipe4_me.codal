@@ -56,6 +56,21 @@ event me : pipeline(pipe.ME)
                 s_me_pcsrc = r_me_zero;
                 break;
 
+            // PHASE 9
+            case BRANCH_JAL:
+                s_me_pcsrc = 0;
+                break;
+            case BRANCH_JALR:
+                s_me_pcsrc = 0;
+                break;
+            case BRANCH_BEQ:
+                s_me_pcsrc = 0;
+                break;
+            case BRANCH_BNE:
+                s_me_pcsrc = 0;
+                break;
+
+
             default:
                 s_me_pcsrc = 0;
                 // codasip_fatal(BRNCH_ERROR, "Default case: %d\n", r_me_brnchop);

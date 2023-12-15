@@ -50,6 +50,12 @@ event fe : pipeline(pipe.IF)
         if (s_me_pcsrc == true){
              s_if_pcin = r_me_bradd;
         }
+        else if(s_ex_take_branch == true){
+            s_if_pcin = s_ex_bradd;
+        }
+        else if(s_id_jal_branch == true){
+            s_if_pcin = s_id_immed + r_id_pc;
+        }
         else {
             s_if_pcin = r_pc;
         }
@@ -64,8 +70,10 @@ event fe : pipeline(pipe.IF)
         // -----------------------------------------------------------------------------------------
         s_if_nextpc = s_if_pcin + INSTR_SIZE;
         // Set all the clear signals.
-        s_id_clear = 0; 
+        s_id_clear = s_ex_take_branch; 
        // s_ex_clear = s_me_pcsrc||s_id_loadhaz;
+       // s_ex_clear = s_me_pcsrc||s_id_stall;
+       //PHase 9
         s_ex_clear = s_me_pcsrc||s_id_stall;
         s_wb_clear = 0;
         s_me_clear = s_me_pcsrc;
